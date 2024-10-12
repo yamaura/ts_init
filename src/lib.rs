@@ -1,29 +1,29 @@
-/// Initializes logging based on the specified environment and output configurations.
-///
-/// This function configures the global logging behavior according to the specified outputs
-/// and the environment string provided. It supports conditional logging to `stderr`, files,
-/// or `journald` based on the inputs.
-///
-/// # Arguments
-/// * `outputs` - A vector of `Option<String>` where each element represents an optional
-///   output destination. Supported values are file paths and "journald".
-/// * `env` - A string slice that represents the logging environment. It can be a simple
-///   level string like "debug" or a detailed filter like "my_crate=info,my_crate::module=debug".
-///
-/// # Examples
-/// ```
-/// init_logging(vec![None, Some("log.log".to_string())], "debug");
-/// init_logging(vec![None, Some("journald".to_string())], "debug");
-/// init_logging(vec![Some("journald".to_string())], "debug");
-/// ```
-///
-/// # Panics
-/// This function panics if the `outputs` vector has more than two elements or if the specified
-/// logging configuration is invalid.
-///
-/// # Errors
-/// This function sets the global default logger and may return an error if logging initialization
-/// fails due to system-level constraints or invalid configurations.
+//! Initializes logging based on the specified environment and output configurations.
+//!
+//! This function configures the global logging behavior according to the specified outputs
+//! and the environment string provided. It supports conditional logging to `stderr`, files,
+//! or `journald` based on the inputs.
+//!
+//! # Arguments
+//! * `outputs` - A vector of `Option<String>` where each element represents an optional
+//!   output destination. Supported values are file paths and "journald".
+//! * `env` - A string slice that represents the logging environment. It can be a simple
+//!   level string like "debug" or a detailed filter like "my_crate=info,my_crate::module=debug".
+//!
+//! # Examples
+//! ```
+//! init_logging(vec![None, Some("log.log".to_string())], "debug");
+//! init_logging(vec![None, Some("journald".to_string())], "debug");
+//! init_logging(vec![Some("journald".to_string())], "debug");
+//! ```
+//!
+//! # Panics
+//! This function panics if the `outputs` vector has more than two elements or if the specified
+//! logging configuration is invalid.
+//!
+//! # Errors
+//! This function sets the global default logger and may return an error if logging initialization
+//! fails due to system-level constraints or invalid configurations.
 pub fn init_logging<S: AsRef<str>>(outputs: Vec<Option<String>>, env: S) {
     use tracing::subscriber::set_global_default;
     //use tracing_subscriber::{fmt, layer::SubscriberExt, EnvFilter};
