@@ -1,5 +1,8 @@
-[package]
-name = "ts_init"
+[workspace]
+resolver = "2"
+members = ["crates/*"]
+
+[workspace.package]
 version = "0.2.0"
 edition = "2021"
 
@@ -11,18 +14,12 @@ repository = "https://github.com/yamaura/ts_init"
 readme = "README.md"
 keywords = []
 categories = []
-include = ["src/**/*.rs", "README.md", "LICENSE"]
 
-[package.metadata.release]
+[workspace.metadata.release]
 push = false
-tag-name = "{{prefix}}{{version}}"
+tag-name = "{{version}}"
 pre-release-commit-message = "Bump version to {{version}}"
 tag-message = "{{tag_name}}"
 
-[package.metadata.docs.rs]
+[workspace.metadata.docs.rs]
 all-features = true
-
-[dependencies]
-tracing = "0.1"
-tracing-journald = "0.3.0"
-tracing-subscriber = { version = "0.3", features = ["env-filter", "tracing-log"] }
