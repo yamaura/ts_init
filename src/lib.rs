@@ -12,9 +12,9 @@
 //!
 //! # Examples
 //! ```
-//! init_logging(vec![None, Some("log.log".to_string())], "debug");
-//! init_logging(vec![None, Some("journald".to_string())], "debug");
-//! init_logging(vec![Some("journald".to_string())], "debug");
+//! ts_init::init_logging(vec![None, Some("log.log".to_string())], "debug");
+//! //ts_init::init_logging(vec![None, Some("journald".to_string())], "debug");
+//! //ts_init::init_logging(vec![Some("journald".to_string())], "debug");
 //! ```
 //!
 //! # Panics
@@ -24,6 +24,22 @@
 //! # Errors
 //! This function sets the global default logger and may return an error if logging initialization
 //! fails due to system-level constraints or invalid configurations.
+
+pub mod prelude;
+
+pub use tracing;
+pub use tracing_subscriber;
+
+use tracing_subscriber::prelude::*;
+use tracing_subscriber::{
+    fmt::format::{DefaultFields, Format, Full},
+    EnvFilter,
+};
+
+#[deprecated(
+    since = "0.2.0",
+    note = "This function is deprecated. Use `ts_init::builder()` instead."
+)]
 pub fn init_logging<S: AsRef<str>>(outputs: Vec<Option<String>>, env: S) {
     use tracing::subscriber::set_global_default;
     //use tracing_subscriber::{fmt, layer::SubscriberExt, EnvFilter};
@@ -77,16 +93,66 @@ pub fn init_logging<S: AsRef<str>>(outputs: Vec<Option<String>>, env: S) {
     .unwrap();
 }
 
-/// create env string from CARGO_PKG_NAME and CARGO_BIN_NAME with given log level
+/// Creates a default subscriber builder that outputs logs to `stderr`.
+///
+/// Unlike `tracing_subscriber::fmt::SubscriberBuilder`, which writes to `stdout` by default,
+/// this builder is configured to write to `stderr`.
+///
+/// The `tracing-log` feature is enabled by default, allowing you to seamlessly use both
+/// `tracing` and `log` crates together.
+///
+/// # Example
+///
+/// ```rust
+/// ts_init::builder().init();
+/// ```
+pub fn builder() -> tracing_subscriber::fmt::SubscriberBuilder<
+    DefaultFields,
+    Format<Full>,
+    tracing_subscriber::filter::LevelFilter,
+    fn() -> std::io::Stderr,
+> {
+    tracing_subscriber::fmt().with_writer(std::io::stderr)
+}
+
+/// Generates the directive string for `tracing_subscriber::filter::EnvFilter`
+/// based on CARGO_PKG_NAME and CARGO_BIN_NAME at the specified log level.
+///
+/// # Example
+/// ```
+/// use ts_init::prelude::*;
+/// let directive = env_filter_directive!("info");
+/// assert_eq!(directive, "ts_init=info");
+/// ```
+#[macro_export]
+macro_rules! env_filter_directive {
+    ($level:expr) => {{
+        let PKG: &str = option_env!("CARGO_PKG_NAME").unwrap();
+        let BIN: &str = option_env!("CARGO_BIN_NAME").unwrap_or(PKG);
+
+        let pkg = PKG.replace('-', "_");
+        let bin = BIN.replace('-', "_");
+
+        if pkg == bin {
+            format!("{}={}", pkg, $level)
+        } else {
+            format!(
+                "{pkg}={lvl},{bin}={lvl}",
+                pkg = pkg,
+                bin = bin,
+                lvl = $level
+            )
+        }
+    }};
+}
+
+#[deprecated(
+    since = "0.2.0",
+    note = "The `crate_env!` macro has been renamed to `env_filter_directive!`. Please update your usage."
+)]
 #[macro_export]
 macro_rules! crate_env {
     ($env:expr) => {
-        format!(
-            "{}={},{}={}",
-            env!("CARGO_PKG_NAME").replace('-', "_"),
-            $env,
-            env!("CARGO_BIN_NAME").replace('-', "_"),
-            $env
-        )
+        $crate::generate_log_env!($env)
     };
 }
