@@ -13,4 +13,4 @@ tracing = "0.1"
 tracing-core = "0.1"
 tracing-journald = "0.3.0"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "tracing-log"] }
-ts_init_macros = { version = "0.1.2", path = "../ts_init_macros" }
+ts_init_macros = { version = "0.2.0", path = "../ts_init_macros" }
